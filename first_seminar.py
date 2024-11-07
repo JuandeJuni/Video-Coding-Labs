@@ -1,5 +1,5 @@
-import ffmpeg
 from PIL import Image
+import subprocess
 import numpy as np
 class VideoEncoder:
     def RGBtoYUV(r,g,b):
@@ -16,22 +16,24 @@ class VideoEncoder:
         return r,g,b
     
     def resizeImage(filepath, width, height,compression):
-        resized = ffmpeg.input(filepath).filter("scale", width, height)
-        ffmpeg.output(resized,"resized"+filepath, q=compression).run()
-    def serpentine(filepath):
+        command = "ffmpeg -i "+filepath+" -vf scale="+str(width)+":"+str(height)+" -qscale:v "+str(compression)+" -y"+" resized"+filepath
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def serpentine(filepath):        
         with Image.open(filepath) as img:
             grayscale = img.convert('L')
             img_array = np.array(grayscale, dtype=np.uint8)
-        col = 0
-        row = 0
-        while (col != img_array.shape[1] and row != img_array.shape[0]):
-            if col == 0:
-                row += 1
+        rows = img_array.shape[0]
+        cols = img_array.shape[1]
+        for i in range(rows):
+            
+            
+                
+           
 
         
 
         print(img_array)
-        # print(position)
 
 
 
