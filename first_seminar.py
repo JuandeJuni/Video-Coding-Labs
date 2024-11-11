@@ -23,17 +23,27 @@ class VideoEncoder:
         with Image.open(filepath) as img:
             grayscale = img.convert('L')
             img_array = np.array(grayscale, dtype=np.uint8)
-        rows = img_array.shape[0]
-        cols = img_array.shape[1]
-        for i in range(rows):
             
-            
-                
-           
-
-        
-
         print(img_array)
+        rows, cols = img_array.shape
+        result = []
+        
+        for d in range(rows + cols - 1):
+            if d % 2 == 0:
+                # Traverse from top to bottom-left (bottom-right if within bounds)
+                r = min(d, rows - 1)
+                c = max(0, d - r)
+                while r >= 0 and c < cols:
+                    result.append(int(img_array[r, c]))
+                    r -= 1
+                    c += 1
+            else:
+                # Traverse from left to top-right (bottom-left if within bounds)
+                c = min(d, cols - 1)
+                r = max(0, d - c)
+                while c >= 0 and r < rows:
+                    result.append(int(img_array[r, c]))
+                    c -= 1
+                    r += 1
 
-
-
+        print(result)
