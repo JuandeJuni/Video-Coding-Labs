@@ -2,6 +2,8 @@ from PIL import Image
 import subprocess
 import numpy as np
 class VideoEncoder:
+    
+    #task 2
     def RGBtoYUV(r,g,b):
         y = round(0.257*r + 0.504*g + 0.098*b+16)
         u = round(-0.148*r - 0.291*g + 0.439*b+128)
@@ -15,10 +17,12 @@ class VideoEncoder:
         b = round(1.164*(y-16) + 2.018*(u-128))
         return r,g,b
     
+    #task 3
     def resizeImage(filepath, width, height,compression):
         command = "ffmpeg -i "+filepath+" -vf scale="+str(width)+":"+str(height)+" -qscale:v "+str(compression)+" -y"+" resized"+filepath
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+    #task 4
     def serpentine(filepath):        
         with Image.open(filepath) as img:
             grayscale = img.convert('L')
@@ -30,7 +34,7 @@ class VideoEncoder:
         
         for d in range(rows + cols - 1):
             if d % 2 == 0:
-                # Traverse from top to bottom-left (bottom-right if within bounds)
+                
                 r = min(d, rows - 1)
                 c = max(0, d - r)
                 while r >= 0 and c < cols:
@@ -38,7 +42,7 @@ class VideoEncoder:
                     r -= 1
                     c += 1
             else:
-                # Traverse from left to top-right (bottom-left if within bounds)
+                
                 c = min(d, cols - 1)
                 r = max(0, d - c)
                 while c >= 0 and r < rows:
@@ -47,3 +51,13 @@ class VideoEncoder:
                     r += 1
 
         print(result)
+        
+    #task 5.1 + comment the results
+    def color_to_bw(filepath, output_path):
+        command = f"ffmpeg -i {filepath} -vf format=gray -q:v 31 {output_path}"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+    #task 5.2
+    
+    bytes_array = b'XXYYZZZZZZMMMMNNQQQQQ'
+    
