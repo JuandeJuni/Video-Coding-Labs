@@ -1,7 +1,26 @@
-from first_seminar import VideoEncoder
+from first_seminar import VideoEncoder, DWT, DCT
 
-print(VideoEncoder.RGBtoYUV(222,107,238))
-print(VideoEncoder.YUVtoRGB(150,168,169))
-VideoEncoder.resizeImage("RaquelJuande.jpeg",4,4,30)
-VideoEncoder.serpentine("resizedRaquelJuande.jpeg")
-VideoEncoder.color_to_bw("RaquelJuande.jpeg","bwRaquelJuande.jpeg")
+print("TASK 2")
+print("RGBtoYUV",VideoEncoder.RGBtoYUV(222,107,238))
+print("YUVtoRGB",VideoEncoder.YUVtoRGB(150,168,169))
+print("TASK 3 - Resizing image to 4x4 with compression")
+VideoEncoder.resizeImage("RaquelJuande.jpeg",400,400,30)
+print("Imaged resized as resized+orignalName.jpeg")
+print("TASK 4 - Serpentine")
+VideoEncoder.serpentine("4x4forSerpentine.jpeg")
+print("TASK 5.1 - Converting to black and white with compression")
+VideoEncoder.color_to_bw("RaquelJuande.jpeg","bwRaquelJuande.jpeg",30)
+print("Imaged converted as bw+orignalName.jpeg")
+print("TASK 5.2 - Runlength encoding")
+string = 'XXYYZZZZZZMMMMNNQQQQQ'
+b = bytearray()
+b.extend(map(ord, string))
+print("Original bytearray",b)
+print("Encoded bytearray",str(VideoEncoder.runlength_encode(b)))
+print("TASK 6 - DCT")
+dctImage = DCT.convert("RaquelJuande.jpeg")
+DCT.decoder(dctImage)
+print("TASK 7 - DWT")
+(LL,LH,HL,HH) = DWT.convert("RaquelJuande.jpeg")
+DWT.decode(LL,LH,HL,HH)
+

@@ -1,6 +1,9 @@
 from PIL import Image
 import subprocess
 import numpy as np
+import pywt
+import matplotlib.pyplot as plt
+from scipy.fftpack import dctn, idctn
 class VideoEncoder:
     
     #task 2
@@ -50,14 +53,64 @@ class VideoEncoder:
                     c -= 1
                     r += 1
 
-        print(result)
+        print("Result:",result)
         
     #task 5.1 + comment the results
-    def color_to_bw(filepath, output_path):
-        command = f"ffmpeg -i {filepath} -vf format=gray -q:v 31 {output_path}"
+    def color_to_bw(filepath, output_path, compression):
+        command = f"ffmpeg -i {filepath} -vf format=gray -q:v {compression} -y {output_path}"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
     #task 5.2
+    def runlength_encode(bytes_array):
+        result = ""
+        count = 1
+        for i in range(1, len(bytes_array)):
+            if bytes_array[i] == bytes_array[i - 1]:
+                count += 1
+            else:
+                result+=f"{bytes_array[i - 1]}{count}"
+                count = 1
+        result+=f"{bytes_array[i - 1]}{count}"
+        return result.encode('utf-8')
     
-    bytes_array = b'XXYYZZZZZZMMMMNNQQQQQ'
-    
+#task 6
+class DCT:
+    def convert(filepath): 
+        with Image.open(filepath) as img:
+            grayscale = img.convert('L')
+            img_array = np.array(grayscale, dtype=np.uint8)
+        dct_image = dctn(img_array, norm = 'ortho')
+        return dct_image
+
+    def decoder(dct_image):
+        estimated_image = idctn(dct_image, norm = 'ortho')
+        plt.imshow(estimated_image, cmap = 'gray')
+        plt.title('Estimated image (DCT)')
+        plt.show()
+#task 7            
+class DWT:
+    def convert(filepath):
+        with Image.open(filepath) as img:
+            grayscale = img.convert('L')
+            img_array = np.array(grayscale, dtype=np.uint8)
+        coeffs = pywt.dwt2(img_array, 'haar')
+        LL,(LH,HL,HH) = coeffs
+        fig, ax = plt.subplots(1, 4, figsize=(12, 12))
+        subbands = [LL, LH, HL, HH]
+        subbands_string = ['LL (Smooth parts of the image)', 'LH (Horizontal details)', 'HL (Vertical details)', 'HH (Diagonal details)']
+        for i,s in enumerate(subbands):
+            ax[i].imshow(s, cmap='gray')
+            ax[i].set_title(subbands_string[i])
+            ax[i].axis('off')
+        plt.show()
+        return subbands
+    def decode(LL, LH, HL, HH):
+        estimated_image = pywt.idwt2((LL, (LH, HL, HH)), 'haar')
+        plt.imshow(estimated_image, cmap = 'gray')
+        plt.title('Estimated image (DWT)')
+        plt.show()
+        return estimated_image
+            
+            
+
+
