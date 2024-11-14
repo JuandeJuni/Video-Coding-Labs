@@ -21,13 +21,13 @@ class VideoEncoder:
         return r,g,b
     
     #task 3
-    def resizeImage(filepath, width, height,compression):
-        command = "ffmpeg -i "+filepath+" -vf scale="+str(width)+":"+str(height)+" -qscale:v "+str(compression)+" -y"+" resized"+filepath
+    def resizeImage(filename, width, height,compression):
+        command = "ffmpeg -i inputs/"+filename+" -vf scale="+str(width)+":"+str(height)+" -qscale:v "+str(compression)+" -y"+" outputs/resized"+filename
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     #task 4
-    def serpentine(filepath):        
-        with Image.open(filepath) as img:
+    def serpentine(filename):        
+        with Image.open(f"inputs/{filename}") as img:
             grayscale = img.convert('L')
             img_array = np.array(grayscale, dtype=np.uint8)
             
@@ -56,8 +56,8 @@ class VideoEncoder:
         print("Result:",result)
         
     #task 5.1 + comment the results
-    def color_to_bw(filepath, output_path, compression):
-        command = f"ffmpeg -i {filepath} -vf format=gray -q:v {compression} -y {output_path}"
+    def color_to_bw(filename, compression):
+        command = f"ffmpeg -i inputs/{filename} -vf format=gray -q:v {compression} -y outputs/bw{filename}"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
     #task 5.2
@@ -75,8 +75,8 @@ class VideoEncoder:
     
 #task 6
 class DCT:
-    def convert(filepath): 
-        with Image.open(filepath) as img:
+    def convert(filename): 
+        with Image.open(f"inputs/{filename}") as img:
             grayscale = img.convert('L')
             img_array = np.array(grayscale, dtype=np.uint8)
         dct_image = dctn(img_array, norm = 'ortho')
@@ -89,8 +89,8 @@ class DCT:
         plt.show()
 #task 7            
 class DWT:
-    def convert(filepath):
-        with Image.open(filepath) as img:
+    def convert(filename):
+        with Image.open(f"inputs/{filename}") as img:
             grayscale = img.convert('L')
             img_array = np.array(grayscale, dtype=np.uint8)
         coeffs = pywt.dwt2(img_array, 'haar')

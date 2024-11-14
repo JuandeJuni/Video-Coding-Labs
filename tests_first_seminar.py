@@ -9,7 +9,7 @@ print("Imaged resized as resized+orignalName.jpeg")
 print("TASK 4 - Serpentine")
 VideoEncoder.serpentine("4x4forSerpentine.jpeg")
 print("TASK 5.1 - Converting to black and white with compression")
-VideoEncoder.color_to_bw("RaquelJuande.jpeg","bwRaquelJuande.jpeg",30)
+VideoEncoder.color_to_bw("RaquelJuande.jpeg",30)
 print("Imaged converted as bw+orignalName.jpeg")
 print("TASK 5.2 - Runlength encoding")
 string = 'XXYYZZZZZZMMMMNNQQQQQ'
