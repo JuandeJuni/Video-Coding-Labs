@@ -52,9 +52,10 @@ class VideoEncoder:
                     result.append(int(img_array[r, c]))
                     c -= 1
                     r += 1
-
-        print("Result:",result)
         
+        print("Result:",result)
+        return result
+    
     #task 5.1 + comment the results
     def color_to_bw(filename, compression):
         command = f"ffmpeg -i inputs/{filename} -vf format=gray -q:v {compression} -y outputs/bw{filename}"
@@ -71,7 +72,7 @@ class VideoEncoder:
                 result+=f"{bytes_array[i - 1]}{count}"
                 count = 1
         result+=f"{bytes_array[i - 1]}{count}"
-        return result.encode('utf-8')
+        return result.encode('ascii')
     
 #task 6
 class DCT:
@@ -82,11 +83,12 @@ class DCT:
         dct_image = dctn(img_array, norm = 'ortho')
         return dct_image
 
-    def decoder(dct_image):
+    def decoder(dct_image,filename):
         estimated_image = idctn(dct_image, norm = 'ortho')
-        plt.imshow(estimated_image, cmap = 'gray')
-        plt.title('Estimated image (DCT)')
-        plt.show()
+        estimated_image_uint8 = np.clip(estimated_image, 0, 255).astype(np.uint8)
+        im = Image.fromarray(estimated_image_uint8)
+        im.save(f"outputs/dct{filename}")
+    
 #task 7            
 class DWT:
     def convert(filename):
