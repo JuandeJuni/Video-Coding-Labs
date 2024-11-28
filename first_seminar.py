@@ -74,6 +74,9 @@ class VideoEncoder:
         result+=f"{bytes_array[i - 1]}{count}"
         return result.encode('ascii')
     
+    def chromaSubsampling(filename,chroma_subsampling):
+        command = f"ffmpeg -i inputs/{filename} -vf format={chroma_subsampling} -y outputs/{chroma_subsampling}{filename}"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 #task 6
 class DCT:
     def convert(filename): 

@@ -11,7 +11,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return "Welcome to the Video (image) Encoder API!, we are Raquel Maldonado (241519) and Juande Gutieree (241573)"
+    return "Welcome to the Video (image) Encoder API!, we are Raquel Maldonado (241519) and Juande Gutierrez (241573)"
 
 
 @app.get("/upload-image-form", response_class=HTMLResponse)
@@ -28,7 +28,7 @@ async def upload_image_form():
     <body>
         <h1>Upload an Image</h1>
         <form action="/upload-image/" enctype="multipart/form-data" method="post">
-            <input type="file" name="image" accept="image/*">
+            <input type="file" name="image" accept="image/*, video/*">
             <button type="submit">Upload</button>
         </form>
     </body>
@@ -42,27 +42,15 @@ async def upload_image(image: UploadFile = File(...)):
     """
     Receives an image and saves it to the server, then returns its details.
     """
-    if image.content_type not in ["image/jpeg", "image/png", "image/jpg"]:
-        return {"error": "Unsupported file type. Please upload a JPEG or PNG image."}
+    if image.content_type not in ["image/jpeg", "image/png", "image/jpg", "video/mp4", "video/quicktime","video/x-msvideo", "video/x-matroska" ]:
+        return {"error": "Unsupported file type. Please upload a JPEG or PNG image or Video."}
 
     # Save the file
     file_path = f"inputs/{image.filename}"
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
-    # Open the image to get details
-    img = Image.open(file_path)
-    width, height = img.size
-    format = img.format
-
-    return {
-        "filename": image.filename,
-        "content_type": image.content_type,
-        "width": width,
-        "height": height,
-        "format": format,
-        "saved_path": file_path,
-    }
+    return "Success"
     
 @app.get("/resize-image/")
 async def resize_image(filename: str,width: int,height: int,compression: int):
@@ -98,3 +86,8 @@ async def RGBtoYUV(r: int,g: int,b: int):
 @app.get("/YUVtoRGB/")
 async def YUVtoRGB(y: int,u: int,v: int):
     return VideoEncoder.YUVtoRGB(y,u,v)
+
+@app.get("/chroma-subsampling/")
+async def ChromaSubsampling(filename: str,chroma_subsampling: str):
+    VideoEncoder.chromaSubsampling(filename,chroma_subsampling)
+    return FileResponse(f"outputs/{chroma_subsampling}{filename}")
