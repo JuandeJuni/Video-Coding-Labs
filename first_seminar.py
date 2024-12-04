@@ -2,6 +2,7 @@ from PIL import Image
 import subprocess
 import numpy as np
 import pywt
+import json
 import matplotlib.pyplot as plt
 from scipy.fftpack import dctn, idctn
 class VideoEncoder:
@@ -77,6 +78,33 @@ class VideoEncoder:
     def chromaSubsampling(filename,chroma_subsampling):
         command = f"ffmpeg -i inputs/{filename} -vf format={chroma_subsampling} -y outputs/{chroma_subsampling}{filename}"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def getInfo(filename):
+        command = f"ffprobe -v quiet -print_format json -show_format -show_streams inputs/{filename}"
+        result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        videoInfo = json.loads(result.stdout)
+        return videoInfo
+    def cutVideo(filename, start, duration):
+        command = f"ffmpeg -i inputs/{filename} -ss {start} -t {duration} -c copy -y outputs/cut{filename}"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def getMonoAAC(filename):
+        command = f"ffmpeg -i outputs/{filename} -c:a aac -ac 1 -y outputs/mono{filename[:-4]}.aac"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def getMP3Stereo(filename,bitrate):
+        command = f"ffmpeg -i outputs/{filename} -c:a libmp3lame -b:a {bitrate} -y outputs/stereo{filename[:-4]}.mp3"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def getAC3(filename):
+        command = f"ffmpeg -i outputs/{filename} -c:a ac3 -y outputs/ac3{filename[:-4]}.ac3"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def packageMP4(videofilename,aacfilename,mp3filename,ac3filename):
+        command = f"ffmpeg -i outputs/{videofilename} -i outputs/{aacfilename} -i outputs/{mp3filename} -i outputs/{ac3filename} -map 0:v -map 1:a -map 2:a -map 3:a -c:a copy -c:v copy -write_tmcd 0 -y outputs/packaged{videofilename[:-4]}.mp4"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def getMotion(filename):
+        command = f"ffmpeg -flags2 +export_mvs -i inputs/{filename} -vf codecview=mv=pf+bf+bb -y outputs/motion{filename[:-4]}.mp4"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def getHistogram(filename):
+        command = f'ffmpeg -i inputs/{filename} -vf "split=2[a][b],[b]histogram,format=yuva444p[hh],[a][hh]overlay" -y outputs/histogram{filename}'
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
 #task 6
 class DCT:
     def convert(filename): 

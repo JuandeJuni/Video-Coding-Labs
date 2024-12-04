@@ -104,4 +104,30 @@ localhost:8000 or 127.0.0.1:8000
 | `u`      | `int` | **Required**. Chroma1 channel value |
 | `v`      | `int` | **Required**. Chroma2 channel value |
 
+#### Chroma Subsampling 
+```http
+  GET /chroma-subsampling
+```
 
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+| `chroma_subsampling`      | `string` | **Required**. You can choose any method name from the list "listChromaSubsampling.txt" |
+
+#### Get Information 
+```http
+  GET /getInfo
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Package Video 
+```http
+  GET /package-video
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
