@@ -123,6 +123,7 @@ async def NumberOfTracks(filename: str):
     }
 
     return resultJson
+
 @app.get("/get-motion")
 async def GetMotion(filename: str):
     VideoEncoder.getMotion(filename)

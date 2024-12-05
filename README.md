@@ -131,3 +131,30 @@ localhost:8000 or 127.0.0.1:8000
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Number of tracks 
+```http
+  GET /number-of-tracks
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Get motion
+```http
+  GET /get-motion
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Get histogram
+```http
+  GET /get-histogram
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
