@@ -7,6 +7,7 @@ from VideoEncoder import VideoEncoder, DCT, DWT
 
 
 app = FastAPI()
+vc = VideoEncoder()
 
 
 @app.get("/")
@@ -54,7 +55,7 @@ async def upload_image(image: UploadFile = File(...)):
     
 @app.get("/resize-image")
 async def resize_image(filename: str,width: int,height: int,compression: int):
-    VideoEncoder.resizeImage(filename,width,height,compression)
+    VideoEncoder.resizeImage(vc,filename,width,height,compression)
     return FileResponse(f"outputs/resized{width}x{height}{filename}")
 
 @app.get("/blackandwhite")
@@ -137,26 +138,29 @@ async def GetHistogram(filename: str):
 #convert input video into vp8 format
 @app.get("/convert-to-vp8")
 async def convertToVP8(filename: str):
-    VideoEncoder.convertToVP8(filename)
+    VideoEncoder.convertToVP8(vc,filename)
     return FileResponse(f"outputs/vp8{filename[:-4]}.webm")
 
 @app.get("/convert-to-vp9")
 async def convertToVP9(filename: str):
-    VideoEncoder.convertToVP9(filename)
+    VideoEncoder.convertToVP9(vc,filename)
     return FileResponse(f"outputs/vp9{filename[:-4]}.webm")
 
 @app.get("/convert-to-h265")
 async def convertToH265(filename: str):
-    VideoEncoder.convertToH265(filename)
+    VideoEncoder.convertToH265(vc,filename)
     return FileResponse(f"outputs/h265{filename}")
 
 @app.get("/convert-to-av1")
 async def convertToAV1(filename: str):
-    VideoEncoder.convertToAV1(filename)
+    VideoEncoder.convertToAV1(vc,filename)
     return FileResponse(f"outputs/av1{filename[:-4]}.mkv")
 
 @app.get("/encoding-ladder")
 async def encondindLadder(filename: str, codec: str):
-    result = VideoEncoder.EncodingLadder(filename,codec)
-    return result
+    result = VideoEncoder.EncodingLadder(vc,filename,codec)
+    if result:
+        return FileResponse(f"ladder{codec}{filename}.zip")
+    else:
+        return "Codec not supported"
 

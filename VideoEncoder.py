@@ -3,6 +3,7 @@ import subprocess
 import numpy as np
 import pywt
 import json
+import os
 import shutil
 import matplotlib.pyplot as plt
 from scipy.fftpack import dctn, idctn
@@ -23,7 +24,7 @@ class VideoEncoder:
         return r,g,b
     
     #task 3
-    def resizeImage(filename, width, height,compression):
+    def resizeImage(self,filename, width, height,compression):
         command = "ffmpeg -i inputs/"+filename+" -vf scale="+str(width)+":"+str(height)+" -qscale:v "+str(compression)+" -y"+" outputs/resized"+str(width)+"x"+str(height)+filename
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -105,50 +106,50 @@ class VideoEncoder:
     def getHistogram(filename):
         command = f'ffmpeg -i inputs/{filename} -vf "split=2[a][b],[b]histogram,format=yuva444p[hh],[a][hh]overlay" -y outputs/histogram{filename}'
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    def convertToVP8(filename):
+    def convertToVP8(self,filename):
         command = f"ffmpeg -i inputs/{filename} -c:v libvpx -b:v 1M -c:a libvorbis -y outputs/vp8{filename[:-4]}.webm"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    def convertToVP9(filename):
+    def convertToVP9(self,filename):
         command = f"ffmpeg -i inputs/{filename} -c:v libvpx-vp9 -b:v 2M -y outputs/vp9{filename[:-4]}.webm"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    def convertToH265(filename):
+    def convertToH265(self,filename):
         command = f"ffmpeg -i inputs/{filename} -c:v libx265 -b:v 1M -y outputs/h265{filename}"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
-    def convertToAV1(filename):
+    def convertToAV1(self,filename):
         command = f"ffmpeg -i inputs/{filename} -c:v libaom-av1 -b:v 1M -y outputs/av1{filename[:-4]}.mkv"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    def EncodingLadder(filename,codec):
+    def EncodingLadder(self,filename,codec):
         resolutions = ["2560x1440","1920x1080","1280x720","854x480","640x360","426x240"]
         codecs = ["vp8","vp9","h265","av1"]
         if codec not in codecs:
             return False
-        command = "mkdir outputs/ladder"
-        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        os.makedirs("outputs/ladder", exist_ok=True)
 
         for res in resolutions:
             width,height = res.split("x")
             self.resizeImage(filename,int(width),int(height),0)
-            commande = f"mv outputs/resized{res}{filename} inputs/resized{res}{filename}"
-            result = subprocess.run(commande, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            os.rename(f"outputs/resized{res}{filename}",f"inputs/resized{res}{filename}")
 
         for res in resolutions:
             if codec == "vp8":
                 self.convertToVP8(f"resized{res}{filename}")
-                commande = f"mv outputs/vp8resized{res}{filename[:-4]}.webm outputs/ladder"
-                result = subprocess.run(commande, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                os.rename(f"outputs/vp8resized{res}{filename[:-4]}.webm",f"outputs/ladder/vp8resized{res}{filename[:-4]}.webm")
+
             elif codec == "vp9":
                 self.convertToVP9(f"resized{res}{filename}")
-                commande = f"mv outputs/vp9resized{res}{filename[:-4]}.webm outputs/ladder"
-                result = subprocess.run(commande, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                os.rename(f"outputs/vp9resized{res}{filename[:-4]}.webm",f"outputs/ladder/vp9resized{res}{filename[:-4]}.webm")
+
             elif codec == "h265":
                 self.convertToH265(f"resized{res}{filename}")
-                commande = f"mv outputs/h265resized{res}{filename} outputs/ladder"
-                result = subprocess.run(commande, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                os.rename(f"outputs/h265resized{res}{filename}",f"outputs/ladder/h265resized{res}{filename}")
+
             elif codec == "av1":
                 self.convertToAV1(f"resized{res}{filename}")
-                commande = f"mv outputs/av1resized{res}{filename[:-4]}.mkv outputs/ladder"
-                result = subprocess.run(commande, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        shutil.make_archive(output_filename, 'zip', dir_name)
+                os.rename(f"outputs/av1resized{res}{filename[:-4]}.mkv",f"outputs/ladder/av1resized{res}{filename[:-4]}.mkv")
+            os.remove(f"inputs/resized{res}{filename}")
+        shutil.make_archive(f"ladder{codec}{filename}", 'zip', "outputs/ladder")
+        shutil.rmtree("outputs/ladder")
+        return True
    
                 
 
