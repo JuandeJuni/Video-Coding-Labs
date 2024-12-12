@@ -158,3 +158,49 @@ localhost:8000 or 127.0.0.1:8000
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Convert to vp8
+```http
+  GET /convert-to-vp8
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Convert to vp9
+```http
+  GET /convert-to-vp9
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Convert to h265
+```http
+  GET /convert-to-h265
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Convert to av1
+```http
+  GET /convert-to-av1
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+
+#### Encoding ladder
+```http
+  GET /encoding-ladder
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+| `codec`      | `string` | **Required**. choose between vp8,vp9,h265,av1 |

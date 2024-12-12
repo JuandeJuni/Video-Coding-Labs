@@ -1,4 +1,4 @@
-from first_seminar import VideoEncoder, DWT, DCT
+from VideoEncoder import VideoEncoder, DWT, DCT
 
 print("TASK 2")
 print("RGBtoYUV",VideoEncoder.RGBtoYUV(222,107,238))
