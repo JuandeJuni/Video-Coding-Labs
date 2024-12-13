@@ -1,8 +1,9 @@
 import sys
 import requests
+import json
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QLabel, QPushButton,
-    QFileDialog, QLineEdit, QComboBox, QWidget, QHBoxLayout
+    QFileDialog, QLineEdit, QComboBox, QWidget, QHBoxLayout, QFormLayout, QScrollArea
 )
 from PyQt5.QtGui import QPixmap
 
@@ -13,10 +14,15 @@ class VideoEncoderGUI(QMainWindow):
         self.setWindowTitle("Video Encoder API GUI")
         self.setGeometry(100, 100, 800, 600)
 
+        # Scroll area setup
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        scroll_area.setWidget(scroll_widget)
+        self.setCentralWidget(scroll_area)
+
         # Central widget and layout
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
-        self.layout = QVBoxLayout(central_widget)
+        self.layout = QVBoxLayout(scroll_widget)
 
         # File upload
         self.upload_button = QPushButton("Upload File")
@@ -34,15 +40,15 @@ class VideoEncoderGUI(QMainWindow):
         self.operation_combo.addItems([
             "Resize Image", "Convert to Black and White", "Chroma Subsampling",
             "DCT Compression", "Run-Length Encoding", "Convert to VP8",
-            "Convert to VP9", "Convert to H265", "Convert to AV1"
+            "Convert to VP9", "Convert to H265", "Convert to AV1", "Encoding Ladder", "Get Info", "Get Tracks"
         ])
+        self.operation_combo.currentTextChanged.connect(self.update_parameter_fields)
         self.layout.addWidget(self.operation_combo)
 
-        # Input parameters
-        self.params_label = QLabel("Enter Parameters (comma-separated if multiple):")
-        self.layout.addWidget(self.params_label)
-        self.params_input = QLineEdit()
-        self.layout.addWidget(self.params_input)
+        # Dynamic parameter fields
+        self.params_layout = QFormLayout()
+        self.params_widgets = {}
+        self.layout.addLayout(self.params_layout)
 
         # Execute button
         self.execute_button = QPushButton("Execute Operation")
@@ -58,6 +64,8 @@ class VideoEncoderGUI(QMainWindow):
         self.api_url = "http://127.0.0.1:8000"  # Your FastAPI server URL
         self.uploaded_file = None
 
+        self.update_parameter_fields()  # Initialize parameter fields
+
     def upload_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select File")
         if file_path:
@@ -72,33 +80,60 @@ class VideoEncoderGUI(QMainWindow):
                 else:
                     self.result_label.setText(f"Error: {response.text}")
 
+    def update_parameter_fields(self):
+        # Clear existing widgets
+        for widget in self.params_widgets.values():
+            widget.setParent(None)
+        self.params_widgets.clear()
+
+        operation = self.operation_combo.currentText()
+        if operation == "Resize Image":
+            self.add_parameter_field("width", QLineEdit(), "Width (int):")
+            self.add_parameter_field("height", QLineEdit(), "Height (int):")
+            self.add_parameter_field("compression", QLineEdit(), "Compression (int):")
+        elif operation == "Encoding Ladder":
+            self.add_parameter_field("codec", QLineEdit(), "Codec (str):")
+        elif operation == "Chroma Subsampling":
+            self.add_parameter_field("chroma_subsampling", QLineEdit(), "Chroma Subsampling (str):")
+        elif operation == "Convert to Black and White":
+            self.add_parameter_field("compression", QLineEdit(), "Compression (int):")
+
+    def add_parameter_field(self, name, widget, label):
+        self.params_layout.addRow(label, widget)
+        self.params_widgets[name] = widget
+
     def execute_operation(self):
         operation = self.operation_combo.currentText()
-        params = self.params_input.text().split(",")
         endpoint = self.get_endpoint(operation)
 
-        if not self.uploaded_file:
+        if operation != "Get Info" and not self.uploaded_file:
             self.result_label.setText("Please upload a file first.")
             return
 
         if endpoint:
-            # Call the endpoint with parameters
-            try:
-                if "filename" in endpoint:
-                    params_dict = {"filename": self.uploaded_file.split("/")[-1]}
-                    if params:
-                        for i, param in enumerate(params):
-                            key = f"param{i + 1}"  # Example parameter names
-                            params_dict[key] = param
-                    response = requests.get(f"{self.api_url}{endpoint}", params=params_dict)
-                else:
-                    response = requests.get(f"{self.api_url}{endpoint}")
+            # Collect parameters
+            params_dict = {"filename": self.uploaded_file.split("/")[-1]}
+            for name, widget in self.params_widgets.items():
+                value = widget.text()
+                if value:
+                    params_dict[name] = value
 
+            try:
+                response = requests.get(f"{self.api_url}{endpoint}", params=params_dict)
                 if response.status_code == 200:
                     self.result_label.setText(f"Success: {operation}")
-                    if "outputs" in response.url:
-                        pixmap = QPixmap(response.url)
-                        self.result_image.setPixmap(pixmap.scaled(400, 400))
+                    if operation == "Encoding Ladder":
+                        # Save and handle the zip file
+                        with open("encoding_ladder.zip", "wb") as f:
+                            f.write(response.content)
+                        self.result_label.setText("Encoding Ladder file saved as encoding_ladder.zip.")
+                    elif operation == "Get Info" or operation == "Get Tracks":
+                        beautified_json = json.dumps(response.json(), indent=4)
+                        self.result_label.setText(f"Info:\n{beautified_json}")
+                    else:
+                        if "outputs" in response.url:
+                            pixmap = QPixmap(response.url)
+                            self.result_image.setPixmap(pixmap.scaled(400, 400))
                 else:
                     self.result_label.setText(f"Error: {response.text}")
             except Exception as e:
@@ -118,6 +153,9 @@ class VideoEncoderGUI(QMainWindow):
             "Convert to VP9": "/convert-to-vp9",
             "Convert to H265": "/convert-to-h265",
             "Convert to AV1": "/convert-to-av1",
+            "Encoding Ladder": "/encoding-ladder",
+            "Get Info": "/get-info",
+            "Get Tracks": "/number-of-tracks"
         }
         return operations.get(operation)
 
