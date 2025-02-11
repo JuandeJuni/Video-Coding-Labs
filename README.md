@@ -204,3 +204,25 @@ localhost:8000 or 127.0.0.1:8000
 | :-------- | :------- | :-------------------------------- |
 | `filename`      | `string` | **Required**. Name of the file you uploaded |
 | `codec`      | `string` | **Required**. choose between vp8,vp9,h265,av1 |
+
+#### Cut video 
+```http
+  GET /cut-video
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+| `start`      | `string` | **Required**. choose an starting time |
+| `end`      | `string` | **Required**. choose the final time |
+
+#### HLS-AVC-AAC format
+```http
+  GET /package-HLS-AVC-AAC
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `filename`      | `string` | **Required**. Name of the file you uploaded |
+| `start`      | `string` | **Required**. choose an starting time |
+| `end`      | `string` | **Required**. choose the final time |

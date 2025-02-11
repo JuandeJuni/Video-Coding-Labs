@@ -164,3 +164,17 @@ async def encondindLadder(filename: str, codec: str):
     else:
         return "Codec not supported"
 
+@app.get("/cut-video")
+async def cutVideo(filename: str,start: str,end: str):
+    VideoEncoder.cutVideo(filename,start,end)
+    return FileResponse(f"outputs/cut{filename}")
+
+@app.get("/package-HLS-AVC-AAC")
+async def packageHLSAVCAAC(filename: str):
+    VideoEncoder.packageHLSAVCAAC(filename)
+    return FileResponse(f"outputs/hls{filename[:-4]}.m3u8")
+
+@app.get("/package-DASH-VP9-AAC")
+async def packageDASHVP9AAC(filename: str):
+    VideoEncoder.packageDASHVP9AAC(filename)
+    return FileResponse(f"outputs/dash{filename[:-4]}.mpd")

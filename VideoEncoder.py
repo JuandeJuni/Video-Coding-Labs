@@ -150,11 +150,15 @@ class VideoEncoder:
         shutil.make_archive(f"ladder{codec}{filename}", 'zip', "outputs/ladder")
         shutil.rmtree("outputs/ladder")
         return True
+    def packageHLSAVCAAC(filename):
+        command = f"ffmpeg -i inputs/{filename} -c:v libx264 -c:a aac -b:a 128k -ac 2 -hls_time 10 -hls_list_size 0 -f hls -y outputs/hls{filename[:-4]}.m3u8"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def packageDASHVP9AAC(filename):
+        command = f"ffmpeg -i inputs/{filename} -c:v libvpx-vp9 -c:a aac -f dash -y outputs/dash{filename[:-4]}.mpd"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
    
                 
-
-
-    
 #task 6
 class DCT:
     def convert(filename): 
